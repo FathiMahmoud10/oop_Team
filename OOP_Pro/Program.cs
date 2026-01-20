@@ -1,4 +1,5 @@
-﻿using OOP_Pro.Classes;
+﻿using OfficeOpenXml;
+using OOP_Pro.Classes;
 using OOP_Pro.Models;
 
 namespace OOP_Pro
@@ -16,29 +17,28 @@ namespace OOP_Pro
              */
         static void Main(string[] args)
         {
-            Student[] students = TextReading.ReadStudentsFromFile("students.txt");
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
 
-            Console.WriteLine($"All Students");
+            Student[] students = TextReading.ReadStudentsFromExcel("Students.xlsx");
 
+            if (students.Length == 0)
+            {
+                Console.WriteLine("No students found.");
+                return;
+            }
 
+            Console.WriteLine("All Students\n");
 
             foreach (var s in students)
             {
                 Console.WriteLine($"{s.Name} - {s.Course} - Grade: {s.Grade}");
             }
 
+            Console.WriteLine("\n");
 
-            Console.WriteLine($"\n");
+            StudentOrgnize.StudentAnalyze(students);
 
-
-            if (students != null)
-            {
-                StudentOrgnize.StudentAnalyze(students);
-            }
-            else
-            {
-                Console.WriteLine("No students found.");
-            }
+            Console.ReadLine();
         }
     }
 }

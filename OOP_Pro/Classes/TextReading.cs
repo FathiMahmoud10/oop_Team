@@ -1,5 +1,7 @@
-﻿using OOP_Pro.Models;
+﻿using OfficeOpenXml;
+using OOP_Pro.Models;
 using System;
+using System.ComponentModel;
 using System.IO;
 
 namespace OOP_Pro.Classes
@@ -7,43 +9,47 @@ namespace OOP_Pro.Classes
     static class TextReading
     {
         /*
- الكلاس ده بيقرا البيانات الموجوده في ملف TEXT 
+الكلاس ده بيقرا البيانات الموجوده في ملف TEXT 
 الملف بيكون محفوظ في ملف ال bin 
 اسم الملف students.txt
 بيقرا البيانات و بيحفظها في Arry
 
-        Features : 
-        load student data
+Features : 
+load student data
 
 
-        By Fathi 
- */
-        public static Student[] ReadStudentsFromFile(string filePath)
+By Fathi 
+*/
+        public static Student[] ReadStudentsFromExcel(string filePath)
         {
             if (!File.Exists(filePath))
             {
-                Console.WriteLine("File not found!");
+                Console.WriteLine("Excel file not found!");
                 return new Student[0];
             }
 
-            string[] lines = File.ReadAllLines(filePath);
-            Student[] students = new Student[lines.Length];
 
-            for (int i = 0; i < lines.Length; i++)
+            using (var package = new ExcelPackage(new FileInfo(filePath)))
             {
-                string[] data = lines[i].Split(',');
+                var worksheet = package.Workbook.Worksheets[0]; // Sheet1
+                int rowCount = worksheet.Dimension.Rows;
 
-                students[i] = new Student
+                Student[] students = new Student[rowCount - 1];
+
+                for (int row = 2; row <= rowCount; row++) // start after header
                 {
-                    Id = int.Parse(data[0]),
-                    Name = data[1],
-                    Course = data[2],
-                    Grade = int.Parse(data[3]),
-                    Attendance = int.Parse(data[4])
-                };
-            }
+                    students[row - 2] = new Student
+                    {
+                        Id = int.Parse(worksheet.Cells[row, 1].Text),
+                        Name = worksheet.Cells[row, 2].Text,
+                        Course = worksheet.Cells[row, 3].Text,
+                        Grade = int.Parse(worksheet.Cells[row, 4].Text),
+                        Attendance = int.Parse(worksheet.Cells[row, 5].Text)
+                    };
+                }
 
-            return students;
+                return students;
+            }
         }
     }
 }
